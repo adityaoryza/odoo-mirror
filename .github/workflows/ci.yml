@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # The same ShellCheck as `make deps-dev` (the one of the Ubuntu image is older and reports other things).
+      - name: Install the development tools
+        run: |
+          python3 -m pip install --user -r requirements-dev.txt
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: ShellCheck version
         run: shellcheck --version
       - name: Lint
