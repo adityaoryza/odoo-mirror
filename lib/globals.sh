@@ -40,6 +40,7 @@ KEEP_BUILD=0
 FORCE=0
 ASSUME_YES=0
 DRY_RUN=0
+UPDATE_CHECK_ONLY=0
 INTERACTIVE="auto"
 ZIP_IN=""
 WORK_DIR=""
@@ -53,7 +54,7 @@ readonly PROFILE_KEYS=(COMMAND REMOTE_HOST SSH_PORT SSH_USER SSH_KEY REMOTE_DB R
     ODOO_VERSION_TAG SANITIZE_SQL_FILE NEUTRALIZE SANITIZE ANONYMIZE KEEP_BUILD)
 
 # Words that name a command: a profile cannot take one of them as its name.
-readonly COMMAND_NAMES=(all backup restore discover check profiles help)
+readonly COMMAND_NAMES=(all backup restore discover check profiles update help)
 readonly ALL_STEPS=(connect inspect dump filestore assemble restore sanitize verify cleanup)
 declare -a ACTIVE_STEPS=()
 

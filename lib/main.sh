@@ -8,10 +8,19 @@ main() {
     parse_args "$@"
     [[ "$COMMAND" == help ]] && { usage; exit 0; }
     [[ "$COMMAND" == profiles ]] && { command_profiles; exit 0; }
+    [[ "$COMMAND" == update ]] && { command_update; exit 0; }
 
-    local wizard_ran=0
+    local wizard_ran=0 run_wizard=0
+    if [[ $# -eq 0 ]] && is_interactive; then
+        run_wizard=1
+        menu_main
+        [[ "$COMMAND" == help ]] && { usage; exit 0; }
+        [[ "$COMMAND" == update ]] && { command_update; exit 0; }
+        # A profile chosen in the menu already holds every answer: no wizard then.
+        [[ -z "$PROFILE" ]] || run_wizard=0
+    fi
     if [[ -n "$PROFILE" ]]; then load_profile "$PROFILE"; fi
-    if [[ $# -eq 0 ]] && is_interactive; then wizard; wizard_ran=1; fi
+    if (( run_wizard )); then wizard; wizard_ran=1; fi
     COMMAND=${COMMAND:-all}
     detect_local_defaults
     resolve_steps

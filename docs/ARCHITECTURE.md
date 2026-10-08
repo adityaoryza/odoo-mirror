@@ -7,13 +7,17 @@ For *using* the tool, see the [README](../README.md).
 
 ```
 odoo-mirror/
-├── scripts/install.sh         Installs the command for any shell (make install).
+├── scripts/
+│   ├── install.sh             Installs the command for any shell: from a checkout, or from a release (checksum verified).
+│   └── release.sh             Builds the release files in a local folder. Publishes nothing.
 ├── bin/odoo-mirror            Entry point: finds its modules, sets traps, calls main. Nothing else.
 ├── lib/
 │   ├── odoo-mirror.sh         Loads every module below, in dependency order.
 │   ├── globals.sh             Constants, defaults, runtime state. The only place with global variables.
 │   ├── log.sh                 Logger, colors, step banners, die.
 │   ├── progress.sh            Progress bar (pv or lib/py/progress.py) and the heartbeat spinner.
+│   ├── menu.sh                The main menu (whiptail, or a numbered list). It only sets COMMAND and PROFILE.
+│   ├── update.sh              `odoo-mirror update`: calls the installer of this copy to fetch the newest release.
 │   ├── input.sh               ask / ask_yn / ask_secret and the wizard.
 │   ├── profile.sh             Load and save profiles (parsed with a whitelist, never executed).
 │   ├── cli.sh                 usage and parse_args (only sets variables).
@@ -46,6 +50,7 @@ odoo-mirror/
 bin/odoo-mirror
   └─ main
        ├─ parse_args              flags → variables
+       ├─ menu_main               only with no arguments and a terminal: what to do (command or profile)
        ├─ load_profile            profile values (a flag still wins)
        ├─ wizard                  only with no arguments and a terminal
        ├─ resolve_steps           command / --steps / --skip → ACTIVE_STEPS
@@ -74,6 +79,19 @@ root when `inspect` did not run).
 | **Profiles are parsed, not sourced** | Sourcing a file executes it. A profile is data. |
 | **Explicit module list, not a glob** | The load order is visible, and ShellCheck can follow every `source`. |
 | **Odoo's CLI for the restore** | `odoo-bin db load -n` is the supported way to load a dump with its filestore and to neutralize it. |
+
+## Releases and updates
+
+A release is three files: `odoo-mirror-vX.Y.Z.tar.gz` (the tool, with a `RELEASE` file holding the version),
+`SHA256SUMS` and `install.sh`. `scripts/release.sh` builds them from the working tree.
+
+`scripts/install.sh` (also shipped inside every release) unpacks a release to `~/.local/share/odoo-mirror/vX.Y.Z/`, points
+`current` to it, and links the command to `current/bin/odoo-mirror`. It refuses an archive whose checksum does not
+match or whose paths could leave the folder. `odoo-mirror update` just runs the installer of the copy you have, so the
+logic exists once. A copy without a `RELEASE` file is a source checkout and is never updated.
+
+The installer reads releases from GitHub, or from `ODOO_MIRROR_RELEASE_BASE` (a folder or URL with a `latest` file and one
+folder per tag): that is what the tests use, so they need no network.
 
 ## Error handling
 
@@ -117,6 +135,7 @@ A change must keep all of these true (they are checked in review):
 |---|---|---|
 | Static | `bash -n`, ShellCheck (from the entry point, so every module is analysed with its context), Python syntax | `make lint` |
 | Unit | Pure logic: formatting, validation, argument parsing, step selection, profiles, `odoo.conf` parsing, the Python helpers | `make test` |
+| Release | `release.sh`, a one-line install from a pipe, `update`, a tampered archive, `uninstall`, all against a local folder | `make test` |
 | Integration | A full cycle (download, zip, restore, sanitize, verify) with fake `ssh` and `sudo`, against one of your local databases | `make selftest` |
 
 The unit tests load the modules with `tests/lib/bootstrap.sh` and never start a run. Keep functions free of side

@@ -1,5 +1,6 @@
 # produced by a run (default output directory is outside the repository)
 odoo-mirror-out/
+dist/
 *.zip
 *.sql.gz
 *.log

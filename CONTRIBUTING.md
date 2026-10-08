@@ -70,3 +70,13 @@ Never run an experiment against a server or a database you do not own.
 
 Unit tests for the remaining functions (see `tests/unit/`), macOS support, resumable downloads, checksum comparison with the
 server, support for more Odoo versions (with the version you tested), and translations of the messages.
+
+## Releasing (maintainers)
+
+1. Update `VERSION` in `lib/globals.sh` and move the `Unreleased` entries of `CHANGELOG.md` under the new version.
+2. `make lint && make test`.
+3. `scripts/release.sh` builds `dist/` and prints the publishing commands (tag, then `gh release create` with the three files).
+   Nothing is published by the script itself.
+4. Install the result once on a clean account (`install.sh remote --version vX.Y.Z`) before announcing it.
+
+Keep the repository generic: no company name, customer data, server address or personal path in code, tests, examples or docs.

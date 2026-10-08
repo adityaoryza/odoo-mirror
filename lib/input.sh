@@ -49,7 +49,7 @@ wizard() {
     printf '\n%s%s — configuration wizard%s\n' "$C_BLD" "$PROG" "$C_OFF" >&2
     printf '%sPress Enter to accept the value in brackets. Nothing secret is stored.%s\n\n' "$C_DIM" "$C_OFF" >&2
 
-    if [[ -z "$PROFILE" && -d "$CONFIG_HOME/profiles" ]] && ls "$CONFIG_HOME/profiles"/*.conf >/dev/null 2>&1; then
+    if (( ! MENU_USED )) && [[ -z "$PROFILE" && -d "$CONFIG_HOME/profiles" ]] && ls "$CONFIG_HOME/profiles"/*.conf >/dev/null 2>&1; then
         printf '  Saved profiles: %s\n' "$(find "$CONFIG_HOME/profiles" -maxdepth 1 -name '*.conf' -printf '%f ' | sed 's/\.conf//g')" >&2
         local p=""
         ask p "Profile to load (empty = new setup)" "" || true

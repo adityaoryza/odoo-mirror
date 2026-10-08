@@ -28,6 +28,10 @@ source "$LIB_DIR/plan.sh"
 source "$LIB_DIR/config.sh"
 # shellcheck source=cli.sh
 source "$LIB_DIR/cli.sh"
+# shellcheck source=menu.sh
+source "$LIB_DIR/menu.sh"
+# shellcheck source=update.sh
+source "$LIB_DIR/update.sh"
 
 # One file per step.
 # shellcheck source=steps/connect.sh

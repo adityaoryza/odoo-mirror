@@ -7,7 +7,7 @@
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20WSL2-lightgrey)
 ![Odoo](https://img.shields.io/badge/tested%20with-Odoo%2019-714B67)
 
-`odoo-mirror` is a single Bash script for Odoo developers and server managers. It connects to an Odoo
+`odoo-mirror` is a Bash tool for Odoo developers and server managers. It connects to an Odoo
 server over SSH, **streams** the database (plain SQL) and the filestore to your machine, builds a zip in
 the exact format of the Odoo Database Manager, and restores it into a local database that is
 **neutralized** (no e-mails, no crons) and cleaned of production credentials.
@@ -46,7 +46,8 @@ and verified.
 - **Always neutralized.** A restore is never offered without neutralize (no e-mails, no crons): the wizard does not even ask. S3 keys and remote-backup targets are removed, and the result is verified.
 - **Progress and logs.** Step counter, timings, progress bars with speed and ETA, and a log file per run.
 - **Choose what runs.** Run everything, only the download, only the restore, or any list of steps.
-- **Interactive or scripted.** A wizard when you give no arguments, flags and saved profiles for automation.
+- **Interactive or scripted.** A menu and a wizard when you give no arguments, flags and saved profiles for automation.
+- **One-line install, self-updating.** Installs from a release with a verified checksum (`odoo-mirror update` keeps it current).
 - **No secrets stored.** Passwords are never written to disk, to the log, or to the process list.
 - **Real data or anonymized: your choice.** Customer data is kept by default; an optional flag anonymizes private individuals.
 
@@ -111,26 +112,72 @@ macOS is not supported yet (GNU-specific options).
 
 ## Installation
 
-```bash
-git clone <repository-url> odoo-mirror
-cd odoo-mirror
-bin/odoo-mirror check               # verifies the local prerequisites
+### From a release (recommended)
 
-# make it a global command (links into ~/.local/bin)
-make install
+```bash
+curl -fsSL https://github.com/adityaoryza/odoo-mirror/releases/latest/download/install.sh | bash
 ```
 
-`make install` works with any shell. It links into a folder that is already in your `PATH`; if there is none, it uses
-`~/.local/bin` and adds it to `PATH` in your bash, zsh and `~/.profile` files (and fish, if installed), once. `make install PREFIX=/usr/local`
-(with `sudo`) installs for every user and every shell without touching any rc file. `make uninstall` removes the link and the lines it added. Once installed, `odoo-mirror` works from any
-folder. For a shorter name, add `alias omr=odoo-mirror` to your shell configuration.
-
-## Quick start
-
-**Wizard** (asks every value, offers to save a profile):
+The installer downloads the latest release, **checks its SHA-256** against `SHA256SUMS`, unpacks it under
+`~/.local/share/odoo-mirror/` and links the `odoo-mirror` command into a folder of your `PATH` (it adds
+`~/.local/bin` to your bash, zsh, `~/.profile` and fish configuration if needed, once). Nothing needs `sudo`.
+Open a new terminal, then:
 
 ```bash
 odoo-mirror
+```
+
+Prefer to read it first? Download the script, look at it, then run it:
+
+```bash
+curl -fsSLO https://github.com/adityaoryza/odoo-mirror/releases/latest/download/install.sh
+less install.sh
+bash install.sh
+```
+
+Useful options: `--prefix /usr/local` (every user, needs `sudo`), `--version v1.1.0` (a specific release).
+
+### Update
+
+```bash
+odoo-mirror update           # install the newest release (checksum verified)
+odoo-mirror update --check   # only say whether one exists
+```
+
+The previous release is kept, so you can go back by pointing `~/.local/share/odoo-mirror/current` to it.
+A source checkout (below) is never touched by `update`: use `git pull` there.
+
+### From a source checkout (to contribute)
+
+```bash
+git clone https://github.com/adityaoryza/odoo-mirror.git
+cd odoo-mirror
+bin/odoo-mirror check               # verifies the local prerequisites
+make install                        # links this checkout as the command
+```
+
+`make install` works with any shell. `make install PREFIX=/usr/local` (with `sudo`) installs for every user. Run
+`make uninstall` (or `scripts/install.sh uninstall`) to remove the command and the `PATH` lines it added; the
+downloaded releases stay in `~/.local/share/odoo-mirror/` until you delete that folder.
+For a shorter name, add `alias omr=odoo-mirror` to your shell configuration.
+
+## Quick start
+
+**Menu and wizard** (with no arguments: choose what to do, then every value is asked and you may save a profile):
+
+```bash
+odoo-mirror
+```
+
+The menu offers: mirror a database, back it up to a zip, restore a zip, list the databases on a server, run a saved
+profile, check the machine, update, and help. It uses arrow keys and Enter when `whiptail` is installed (it is on
+Ubuntu and WSL2), and a numbered list otherwise (`ODOO_MIRROR_MENU=plain` forces the list,
+`ODOO_MIRROR_NO_MENU=1` skips the menu and goes straight to the wizard).
+
+**Run a saved profile** (no questions, only the passwords):
+
+```bash
+odoo-mirror staging
 ```
 
 **Download a database and its filestore** (nothing is restored):
@@ -168,6 +215,8 @@ odoo-mirror discover --host myserver
 | `restore` | restore → sanitize → verify → cleanup | Load an existing zip locally (`--zip`). |
 | `discover` | connect, then a listing | Databases and filestores on the server. |
 | `check` | none | Verify the local prerequisites. |
+| `profiles` | none | List the saved profiles. |
+| `update` | none | Install the newest release (`--check`: only look). |
 
 Fine tuning: `--steps dump,assemble` runs only those steps, `--skip filestore` runs everything except it, and `--dry-run` prints the plan without doing anything.
 
@@ -231,6 +280,17 @@ and is parsed against a whitelist: it is never executed. Create one with `--save
 ```bash
 odoo-mirror --profile staging
 ```
+
+### Environment variables
+
+| Variable | Effect |
+|---|---|
+| `ODOO_MIRROR_HOME` | Where profiles and settings live (default `~/.config/odoo-mirror`). |
+| `ODOO_MIRROR_MENU=plain` | Numbered menu instead of the `whiptail` one. |
+| `ODOO_MIRROR_NO_MENU=1` | No menu: with no arguments, go straight to the wizard. |
+| `ODOO_MIRROR_SUDO_PASSWORD` | sudo password for unattended runs (discouraged: prefer the hidden prompt). |
+| `ODOO_MIRROR_REPO` | GitHub repository used by the installer and `update` (default `adityaoryza/odoo-mirror`). |
+| `ODOO_MIRROR_PREFIX` | Where releases are unpacked (default `~/.local/share/odoo-mirror`). |
 
 ## Security model
 
@@ -298,7 +358,8 @@ Exit status is `0` on success and non-zero otherwise (`130` when interrupted).
 
 ```
 bin/odoo-mirror      entry point
-lib/                 modules (logger, input, ssh, local, plan, one file per step ...) and lib/py/ helpers
+lib/                 modules (logger, menu, input, ssh, local, plan, update, one file per step ...) and lib/py/ helpers
+scripts/             install.sh (one-line installer, also used by `update`) and release.sh (builds a release)
 sql/                 the SQL run on the restored copy
 examples/            an example profile
 tests/               unit tests, and an integration test with a fake server

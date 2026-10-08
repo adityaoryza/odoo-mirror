@@ -1,8 +1,8 @@
 # odoo-mirror: developer tasks.   `make help` lists them.
 SHELL := bash
 
-SHELL_SOURCES := bin/odoo-mirror scripts/install.sh $(shell find lib -name '*.sh') $(shell find tests -name '*.sh')
-LINT_ENTRY    := bin/odoo-mirror scripts/install.sh tests/run-unit.sh tests/integration/selftest.sh \
+SHELL_SOURCES := bin/odoo-mirror scripts/install.sh scripts/release.sh $(shell find lib -name '*.sh') $(shell find tests -name '*.sh')
+LINT_ENTRY    := bin/odoo-mirror scripts/install.sh scripts/release.sh tests/run-unit.sh tests/integration/selftest.sh \
                  tests/integration/fake-remote/ssh tests/integration/fake-remote/sudo \
                  $(wildcard tests/unit/*.sh) $(wildcard tests/lib/*.sh)
 

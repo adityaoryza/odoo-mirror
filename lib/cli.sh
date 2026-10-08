@@ -15,13 +15,14 @@ COMMANDS
   all         every step (default)             backup  connect → … → assemble (writes the zip)
   restore     restore an existing zip locally   discover  list the filestores / DBs on the server
   check       only verify local prerequisites   profiles  list the saved profiles
-  help        this text
+  update      install the newest release        help      this text
+              (update --check: only look)
 
 PROFILE SHORTCUT
   ${0##*/} staging                run the saved profile 'staging' (same as --profile staging)
   ${0##*/} backup staging         the same profile, but only the download
 
-With no arguments in a terminal, a wizard asks for every value.
+With no arguments in a terminal, a menu asks what to do and a wizard asks for every value.
 
 REMOTE
   --host HOST            ssh host or alias from ~/.ssh/config
@@ -78,7 +79,7 @@ need_val() { [[ $# -ge 2 && -n "$2" ]] || die "Option $1 needs a value"; }
 parse_args() {
     while (( $# )); do
         case "$1" in
-            all|backup|restore|discover|check|profiles|help) COMMAND=$1 ;;
+            all|backup|restore|discover|check|profiles|update|help) COMMAND=$1 ;;
             --host) need_val "$@"; REMOTE_HOST=$2; shift ;;
             --port) need_val "$@"; SSH_PORT=$2; shift ;;
             --user) need_val "$@"; SSH_USER=$2; shift ;;
@@ -109,6 +110,7 @@ parse_args() {
             -y|--yes) ASSUME_YES=1 ;;
             --non-interactive) INTERACTIVE="no" ;;
             --dry-run) DRY_RUN=1 ;;
+            --check) UPDATE_CHECK_ONLY=1 ;;
             --version) echo "${PROG} ${VERSION}"; exit 0 ;;
             -h|--help) COMMAND=help ;;
             -*) die "Unknown option: $1 (see --help)" ;;

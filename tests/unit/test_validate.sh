@@ -4,7 +4,7 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/bootstrap.sh"
 
 # Database names reach a shell, a path and SQL: anything unusual must be refused.
-for ok in a my_db my-db.1 preaucess-staging_260707 PreauCessServer 0db; do
+for ok in a my_db my-db.1 my-company_staging_260707 MyServer 0db; do
     assert_ok "valid_name accepts '$ok'" valid_name "$ok"
 done
 for ko in "" "a;b" "a b" '$(id)' '`id`' "-rf" ".hidden" "a/b" "a'b" 'a"b' "a|b" "é"; do

@@ -3,10 +3,10 @@
 # shellcheck source=../lib/bootstrap.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/bootstrap.sh"
 
-parse_args backup --host srv --port 2323 --user adm --remote-db mydb --local-db copy --no-sudo --anonymize --keep-build -y
+parse_args backup --host srv --port 2222 --user adm --remote-db mydb --local-db copy --no-sudo --anonymize --keep-build -y
 assert_eq "backup" "$COMMAND" "the command is read"
 assert_eq "srv" "$REMOTE_HOST" "--host"
-assert_eq "2323" "$SSH_PORT" "--port"
+assert_eq "2222" "$SSH_PORT" "--port"
 assert_eq "adm" "$SSH_USER" "--user"
 assert_eq "mydb" "$REMOTE_DB" "--remote-db"
 assert_eq "copy" "$LOCAL_DB" "--local-db"
