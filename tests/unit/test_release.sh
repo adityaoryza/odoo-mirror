@@ -18,7 +18,7 @@ assert_eq "yes" "$([[ -s "$TMP/dist1/SHA256SUMS" ]] && echo yes || echo no)" "re
 assert_eq "no" "$(tar -tzf "$TMP/dist1/odoo-mirror-v$current_version.tar.gz" | grep -c '/tests/' | grep -q '^0$' && echo no || echo yes)" "the archive does not carry the tests"
 
 # ... installed from a pipe, like `curl | bash`.
-out=$(cat "$ROOT_DIR/scripts/install.sh" | bash 2>&1); rc=$?
+out=$(bash <"$ROOT_DIR/scripts/install.sh" 2>&1); rc=$?
 assert_eq "0" "$rc" "the one-line install works"
 assert_contains "$out" "checksum OK" "...after checking the checksum"
 assert_eq "odoo-mirror $current_version" "$("$HOME/.local/bin/odoo-mirror" --version)" "...and the command runs"

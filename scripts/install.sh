@@ -169,7 +169,7 @@ sha256_check() { # dir file  (reads dir/SHA256SUMS)
 
 installed_version() { # the version of the release that `current` points to
     local f="$INSTALL_ROOT/current/RELEASE"
-    [[ -f "$f" ]] && tr -d '[:space:]' <"$f" || true
+    if [[ -f "$f" ]]; then tr -d '[:space:]' <"$f"; fi
 }
 
 # true when A is a lower version than B (both dotted, no leading v)
