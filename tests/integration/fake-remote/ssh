@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Test double for ssh: ignores the options and the host, runs the remote command locally.
+for a in "$@"; do
+    [[ "$a" == "-O" || "$a" == "-fN" ]] && exit 0
+done
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -o|-p|-l|-i) shift 2 ;;
+        -*) shift ;;
+        *) break ;;
+    esac
+done
+shift                      # the host
+exec bash -c "$*"

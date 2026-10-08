@@ -1,0 +1,4 @@
+# odoo-mirror needs no Python package: its helpers (lib/py/) use the standard library only.
+# This file exists so that `pip install -r requirements.txt` is always safe to run in CI or a container.
+#
+# System tools (ssh, psql, tar ...) are listed in packages.apt.

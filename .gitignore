@@ -1,0 +1,12 @@
+# produced by a run (default output directory is outside the repository)
+odoo-mirror-out/
+*.zip
+*.sql.gz
+*.log
+
+# local settings and editors
+*.local.conf
+.idea/
+.vscode/
+__pycache__/
+*.pyc

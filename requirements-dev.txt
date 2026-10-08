@@ -1,0 +1,3 @@
+# Only to work on odoo-mirror itself (make lint). Install with: pip install -r requirements-dev.txt
+-r requirements.txt
+shellcheck-py>=0.10

@@ -1,0 +1,25 @@
+# System packages for Ubuntu / Debian / WSL2.
+#   grep -vE '^\s*(#|$)' packages.apt | xargs sudo apt install -y        (or: make deps)
+
+# --- download a database and its filestore ---
+openssh-client
+python3
+gzip
+tar
+gawk
+sed
+findutils
+coreutils
+
+# --- restore it locally (a local Odoo and PostgreSQL server are yours to set up) ---
+postgresql-client
+unzip
+
+# --- optional: nicer progress bar (a built-in one is used otherwise) ---
+pv
+
+# --- only to work on odoo-mirror itself (make lint / test / selftest) ---
+make
+shellcheck
+cpio
+git

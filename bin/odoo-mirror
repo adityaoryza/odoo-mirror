@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#
+# odoo-mirror: mirror a remote Odoo database and its filestore to your machine, neutralized.
+# Documentation: README.md. This file only locates the modules and starts them.
+#
+set -Eeuo pipefail
+shopt -s inherit_errexit 2>/dev/null || true
+
+if (( BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 4) )); then
+    echo "bash >= 4.4 is required (found ${BASH_VERSION})" >&2
+    exit 2
+fi
+
+# Follow symlinks (make install links this file into a bin directory).
+ROOT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd -P)"
+LIB_DIR="$ROOT_DIR/lib"
+SQL_DIR="$ROOT_DIR/sql"
+readonly ROOT_DIR LIB_DIR SQL_DIR
+
+# shellcheck source=../lib/odoo-mirror.sh
+source "$LIB_DIR/odoo-mirror.sh"
+
+install_traps
+main "$@"
