@@ -27,7 +27,9 @@ collect_config() {
     if [[ "$COMMAND" != discover && "$COMMAND" != check ]]; then
         local base=${REMOTE_DB:-}
         if [[ -z "$base" && -n "$ZIP_IN" ]]; then base=$(basename "$ZIP_IN" .zip); fi
-        local suggestion="${base//[^A-Za-z0-9_]/_}_local"
+        local suggestion=""
+        # No database name yet when the user will pick it from the server list: no suggestion then.
+        [[ -z "$base" ]] || suggestion="${base//[^A-Za-z0-9_]/_}_local"
         if needs_local_restore; then
             ask LOCAL_DB "Local database to create" "$suggestion" || die "--local-db is required"
             ask ODOO_BIN    "Path to odoo-bin" "" || die "--odoo-bin is required"

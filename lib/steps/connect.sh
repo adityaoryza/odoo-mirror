@@ -26,7 +26,7 @@ connect_remote() {
         else
             ask_secret SUDO_PW "sudo password on ${REMOTE_HOST} (hidden)"
         fi
-        if ! rsudo true >/dev/null 2>>"$LOG_FILE"; then
+        if ! rsudo true >/dev/null 2>>"${LOG_FILE:-/dev/null}"; then
             die "sudo check failed on the server (wrong password, or this user cannot use sudo; try --no-sudo)"
         fi
         log_ok "ssh + sudo OK"
