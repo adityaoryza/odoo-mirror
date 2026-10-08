@@ -7,6 +7,16 @@
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20WSL2-lightgrey)
 ![Odoo](https://img.shields.io/badge/tested%20with-Odoo%2019-714B67)
 
+### Install in one line
+
+```bash
+curl -fsSL https://github.com/adityaoryza/odoo-mirror/releases/latest/download/install.sh | bash
+```
+
+Then open a new terminal and run **`odoo-mirror`**: a menu asks what you want to do. The installer verifies the SHA-256 of the release and needs no `sudo`; `odoo-mirror update` keeps it current. To read the script first, or to install another way, see [Installation](#installation).
+
+---
+
 `odoo-mirror` is a Bash tool for Odoo developers and server managers. It connects to an Odoo
 server over SSH, **streams** the database (plain SQL) and the filestore to your machine, builds a zip in
 the exact format of the Odoo Database Manager, and restores it into a local database that is
