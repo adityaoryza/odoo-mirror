@@ -4,7 +4,7 @@
 # Every default lives here; a profile, the environment or a flag overrides them (see cli.sh and profile.sh).
 # This file is sourced by lib/odoo-mirror.sh: it only defines functions and constants.
 
-readonly VERSION="1.0.0"
+readonly VERSION="1.1.0"
 readonly PROG="odoo-mirror"
 
 

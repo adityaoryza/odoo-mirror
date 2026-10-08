@@ -5,6 +5,8 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-08
+
 ### Changed
 - The single script is split into modules under `lib/` (one file per step in `lib/steps/`), with an entry point in `bin/`.
   The command line and the behaviour are unchanged.
