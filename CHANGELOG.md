@@ -5,6 +5,8 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-14
+
 ### Added
 - **Automatic name of the local database.** `--local-db auto` (the default; in the wizard, an empty answer) names the copy
   `<server database>_<YYMMDD>`, then `_2`, `_3`... while that name is taken by a database, by a leftover filestore folder, or by
