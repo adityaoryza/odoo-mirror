@@ -15,6 +15,8 @@ curl -fsSL https://github.com/adityaoryza/odoo-mirror/releases/latest/download/i
 
 Then open a new terminal and run **`odoo-mirror`**: a menu asks what you want to do. The installer verifies the SHA-256 of the release and needs no `sudo`; `odoo-mirror update` keeps it current. To read the script first, or to install another way, see [Installation](#installation).
 
+> **Windows:** `odoo-mirror` is a Linux tool and runs in [WSL2](https://learn.microsoft.com/windows/wsl/install). Install it once (PowerShell as administrator: `wsl --install`), open the **Ubuntu** terminal and run the command above there. Afterwards you can also start it from Windows with `wsl odoo-mirror`. It does not run in Command Prompt or PowerShell.
+
 ---
 
 `odoo-mirror` is a Bash tool for Odoo developers and server managers. It connects to an Odoo
@@ -121,6 +123,14 @@ dumps from current servers (14.19, 15.14, 16.10, 17.6 or later); the restore ste
 macOS is not supported yet (GNU-specific options).
 
 ## Installation
+
+### On Windows
+
+1. Install WSL2 and Ubuntu once: in PowerShell as administrator, run `wsl --install`, then restart.
+2. Open the **Ubuntu** app (or run `wsl` in a terminal).
+3. Follow *From a release* below, inside Ubuntu.
+
+Your Windows files are under `/mnt/c/Users/<you>/` inside Ubuntu. Keep the output folder (`--out-dir`) on the Linux side (`~/odoo-mirror`, the default) for speed: databases and filestores are large and Windows drives are slow from WSL.
 
 ### From a release (recommended)
 
