@@ -5,6 +5,8 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-14
+
 ### Fixed
 - The filestore step no longer fails on a server that is in use. GNU `tar` exits with 1 when a file changes while it is read
   ("file changed as we read it"): the copy is complete, so it is now a warning, and the file count check that follows still
