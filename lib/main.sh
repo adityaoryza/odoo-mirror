@@ -27,6 +27,7 @@ main() {
     collect_config
     validate_config
     resolve_remote_db
+    resolve_local_db
     # After the wizard, offer to keep the answers (never a secret) for the next run.
     if (( wizard_ran )) && [[ -z "$SAVE_PROFILE" && -z "$PROFILE" ]]; then
         ask SAVE_PROFILE "Save these answers as a profile for next time? (a name, empty = no)" "" || true

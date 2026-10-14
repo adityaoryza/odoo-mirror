@@ -29,12 +29,14 @@ validate_config() {
         [[ -z "$SSH_PORT" || "$SSH_PORT" =~ ^[0-9]+$ ]] || die "Invalid SSH port: $SSH_PORT"
     fi
     if needs_local_restore; then
-        valid_name "$LOCAL_DB" || die "Invalid local database name: '${LOCAL_DB}'"
+        [[ -z "$LOCAL_DB" || "$LOCAL_DB" == auto ]] || valid_name "$LOCAL_DB" || die "Invalid local database name: '${LOCAL_DB}'"
         [[ -f "$ODOO_BIN"  ]] || die "odoo-bin not found: '$ODOO_BIN'"
         [[ -x "$ODOO_PYTHON" ]] || die "Python not executable: '$ODOO_PYTHON'"
         [[ -f "$ODOO_CONF" ]] || die "odoo.conf not found: '$ODOO_CONF'"
+        local dup; dup=$(conf_duplicate_options)
+        [[ -z "$dup" ]] || die "$ODOO_CONF has an option written twice: ${dup//$'\n'/; }. Odoo cannot read it: keep one line, then run again."
         local active; active=$(conf_get db_name)
-        [[ "$LOCAL_DB" != "$active" ]] || die "'$LOCAL_DB' is the database your Odoo uses (db_name in odoo.conf). Pick another name."
+        [[ -z "$LOCAL_DB" || "$LOCAL_DB" == auto || "$LOCAL_DB" != "$active" ]] || die "'$LOCAL_DB' is the database your Odoo uses (db_name in odoo.conf). Pick another name, or use --local-db auto."
         if (( ! NEUTRALIZE )) && (( ! I_UNDERSTAND_LIVE_EMAILS )); then
             die "Refusing to restore without neutralizing: the copy would keep real SMTP credentials and crons. Add --i-understand-emails-will-be-live if you really mean it."
         fi

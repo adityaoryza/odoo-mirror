@@ -34,7 +34,7 @@ REMOTE
   --pg-os-user USER      os user that may run pg_dump (default: postgres)
 
 LOCAL
-  --local-db NAME        database to create (default: <remote-db>_local)
+  --local-db NAME        database to create. Default and 'auto': <remote-db>_<YYMMDD>, then _2, _3... when it exists
   --out-dir DIR          where backups and logs go (default: \$HOME/odoo-mirror)
   --odoo-bin FILE  --odoo-python FILE  --odoo-conf FILE
   --zip FILE             restore this zip instead of downloading

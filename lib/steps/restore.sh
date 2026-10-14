@@ -23,7 +23,7 @@ step_restore() {
     fi
 
     if local_db_exists "$LOCAL_DB"; then
-        (( FORCE )) || die "Local database '$LOCAL_DB' already exists. Use --force to replace it, or pick another name."
+        (( FORCE )) || die "Local database '$LOCAL_DB' already exists. Use --force to replace it, --local-db auto to get a new name (<server database>_<date>), or pick another name."
         if ! (( ASSUME_YES )); then
             local typed=""
             is_interactive || die "--force needs --yes in non-interactive mode"

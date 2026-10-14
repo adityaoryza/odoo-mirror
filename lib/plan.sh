@@ -53,7 +53,7 @@ print_plan() {
             printf '  filestore root %s\n' "${REMOTE_FS_ROOT:-auto-detect}"
         fi
         if needs_local_restore; then
-            printf '  local db       %s   (neutralize: %s, sanitize: %s)\n' "$LOCAL_DB" "$([[ $NEUTRALIZE == 1 ]] && echo yes || echo NO)" "$([[ $SANITIZE == 1 ]] && echo yes || echo no)"
+            printf '  local db       %s   (%sneutralize: %s, sanitize: %s)\n' "$LOCAL_DB" "$([[ ${LOCAL_DB_AUTO:-0} == 1 ]] && echo 'automatic name, ')" "$([[ $NEUTRALIZE == 1 ]] && echo yes || echo NO)" "$([[ $SANITIZE == 1 ]] && echo yes || echo no)"
             printf '  odoo           %s -c %s\n' "$ODOO_BIN" "$ODOO_CONF"
             if (( ANONYMIZE )); then
                 printf '  personal data  anonymized (private individuals); companies and addresses are kept\n'

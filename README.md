@@ -257,7 +257,7 @@ Fine tuning: `--steps dump,assemble` runs only those steps, `--skip filestore` r
 
 | Option | Meaning |
 |---|---|
-| `--local-db NAME` | Database to create (default `<remote-db>_local`). |
+| `--local-db NAME` | Database to create. Default and `auto`: `<remote-db>_<YYMMDD>`, then `_2`, `_3`... while the name is taken (a database, a filestore folder, or the `db_name` of `odoo.conf`). |
 | `--out-dir DIR` | Where zips and logs go (default `~/odoo-mirror`). |
 | `--odoo-bin FILE`, `--odoo-python FILE`, `--odoo-conf FILE` | Your local Odoo (detected when possible). |
 | `--zip FILE` | Restore this zip instead of downloading. |

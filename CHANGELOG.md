@@ -5,6 +5,14 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **Automatic name of the local database.** `--local-db auto` (the default; in the wizard, an empty answer) names the copy
+  `<server database>_<YYMMDD>`, then `_2`, `_3`... while that name is taken by a database, by a leftover filestore folder, or by
+  the `db_name` of `odoo.conf`. The name is chosen once the server database is known, so it also works when it is picked from the list.
+  A name typed by hand is used as it is, as before.
+- `odoo.conf` is checked before the download: an option written twice (for example two `db_name` lines) stops Odoo at startup,
+  so the run now refuses it at once, with the line numbers, instead of failing at the restore step after the download.
+
 ## [1.1.1] - 2026-10-14
 
 ### Fixed

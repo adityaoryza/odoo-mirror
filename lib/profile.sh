@@ -32,9 +32,13 @@ save_profile() {
     file="$CONFIG_HOME/profiles/$name.conf"
     {
         echo "# odoo-mirror profile '$name' — saved $(_stamp). No secrets are stored here."
+        local value
         for k in "${PROFILE_KEYS[@]}"; do
-            [[ "${!k:-}" != *[\"\\$'\n']* ]] || die "Cannot save $k: the value contains a quote, backslash or newline"
-            printf '%s="%s"\n' "$k" "${!k:-}"
+            value=${!k:-}
+            # A name picked by odoo-mirror is saved as "auto": the next run must pick its own, not reuse this one.
+            [[ "$k" == LOCAL_DB && "${LOCAL_DB_AUTO:-0}" == 1 ]] && value=auto
+            [[ "$value" != *[\"\\$'\n']* ]] || die "Cannot save $k: the value contains a quote, backslash or newline"
+            printf '%s="%s"\n' "$k" "$value"
         done
     } >"$file"
     chmod 600 "$file"

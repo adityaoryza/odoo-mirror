@@ -26,6 +26,7 @@ USE_SUDO="${USE_SUDO:-1}"
 REMOTE_PG_OSUSER="${REMOTE_PG_OSUSER:-postgres}"
 
 LOCAL_DB="${LOCAL_DB:-}"
+LOCAL_DB_AUTO=0     # 1 = the name was chosen by odoo-mirror (--local-db auto)
 OUT_DIR="${OUT_DIR:-$HOME/odoo-mirror}"
 ODOO_BIN="${ODOO_BIN:-}"
 ODOO_PYTHON="${ODOO_PYTHON:-}"
