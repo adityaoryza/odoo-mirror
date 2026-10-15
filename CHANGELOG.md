@@ -5,10 +5,22 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-10-15
+
+### Changed
+- A calmer look: step titles with an accent arrow, labels of the plan and info marks dimmed, and the "done in" line of a step in
+  a quiet tone. A dry run and commands without steps (`check`, `profiles`) no longer end with a summary frame.
+
+### Fixed
+- Icons that some terminals (Windows Terminal) draw as two-column emoji and overlap the text after them: the info, success,
+  warning and error marks are now plain one-column symbols (`• ✓ ▲ ✗`).
+- An SSH key file that does not exist (a stray `\` typed at the prompt, for example) is refused at once with a clear message,
+  instead of an `Identity file ... not accessible` warning at every step.
+
 ## [1.3.0] - 2026-10-15
 
 ### Added
-- **Clearer terminal output.** Icons for info, success, warning, error and step (`ℹ ✔ ⚠ ✘ ▶`) on a UTF-8 terminal, plain
+- **Clearer terminal output.** Icons for info, success, warning, error and step (`• ✓ ▲ ✗ ▶`) on a UTF-8 terminal, plain
   `INFO / OK / WARN / ERROR` labels everywhere else.
 - **Run summary.** Every successful run ends with a frame: the steps with their duration, the warnings they raised, the name of
   the restored database (with its size and the `db_name` line to use) or the zip, and the log file. A dry run says so
