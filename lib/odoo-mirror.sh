@@ -12,6 +12,8 @@ source "$LIB_DIR/globals.sh"
 source "$LIB_DIR/log.sh"
 # shellcheck source=progress.sh
 source "$LIB_DIR/progress.sh"
+# shellcheck source=summary.sh
+source "$LIB_DIR/summary.sh"
 # shellcheck source=input.sh
 source "$LIB_DIR/input.sh"
 # shellcheck source=profile.sh

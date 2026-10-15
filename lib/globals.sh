@@ -68,6 +68,10 @@ REMOTE_DB_PICK=0   # 1 = the user left the database name empty: list the server 
 STEP_TOTAL=0
 STEP_INDEX=0
 STEP_START=0
+declare -a STEP_LOG=()     # "step|seconds", one per finished step (for the summary)
+declare -a STEP_NOTES=()   # "step|warning", the warnings raised while a step ran
+MAIN_PID=$$
+FAILURE_REPORTED=0
 RUN_START=$SECONDS
 CURRENT_STEP="(init)"
 REMOTE_DB_BYTES=0

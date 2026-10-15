@@ -7,12 +7,13 @@
 on_error() {
     local rc=$? line=$1
     trap - ERR
+    # A pipeline or a subshell runs its own copy of this trap: only the main shell reports, once.
+    [[ "$BASHPID" == "$MAIN_PID" ]] || exit "$rc"
     # Ctrl+C kills the commands of a pipeline (ssh exits with 255, for instance) and bash sees the failure
     # before it runs the INT trap. Wait a moment: a pending interrupt is handled here, as the user stopping
     # the run (exit 130), not as the failure of a step.
     sleep 0.2
-    log_error "step '${CURRENT_STEP}' failed (line ${line}, exit ${rc})"
-    [[ -n "$LOG_FILE" ]] && log_error "details: $LOG_FILE"
+    print_failure "$rc" "$line"
     exit "$rc"
 }
 
@@ -24,8 +25,13 @@ on_exit() {
     done
     ssh_close
     SUDO_PW=""
-    if [[ -n "$LOG_FILE" && $rc -eq 0 ]]; then
-        printf '\n%s%s finished in %s%s   log: %s\n' "$C_GRN" "$PROG" "$(fmt_dur $((SECONDS - RUN_START)))" "$C_OFF" "$LOG_FILE" >&2
+    if [[ -n "$LOG_FILE" && "$BASHPID" == "$MAIN_PID" ]]; then
+        if (( rc == 0 )); then
+            print_summary || true
+        elif (( rc != 130 && rc != 143 && ! FAILURE_REPORTED )); then
+            # a step stopped the run with die(): no ERR trap fired, so the failure box was not printed yet
+            print_failure "$rc" "" || true
+        fi
     fi
 }
 
