@@ -5,6 +5,21 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-15
+
+### Added
+- **Clearer terminal output.** Icons for info, success, warning, error and step (`ℹ ✔ ⚠ ✘ ▶`) on a UTF-8 terminal, plain
+  `INFO / OK / WARN / ERROR` labels everywhere else.
+- **Run summary.** Every successful run ends with a frame: the steps with their duration, the warnings they raised, the name of
+  the restored database (with its size and the `db_name` line to use) or the zip, and the log file. A dry run says so
+  ("nothing was changed") instead of "Done".
+
+### Changed
+- A failed run is reported once, in one frame: the step, a hint on what to check, and the log file. This holds for the failures
+  stopped by a step (for example an SSH connection that fails) as well as for a command that exits with an error. Ctrl+C is still
+  reported as an interruption, not as a failure.
+- Steps shorter than two seconds no longer print a line of their own, and a progress bar never leaves a half-drawn line behind.
+
 ## [1.2.0] - 2026-10-14
 
 ### Added
