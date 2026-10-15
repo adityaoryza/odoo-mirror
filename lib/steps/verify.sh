@@ -8,8 +8,8 @@ step_verify() {
     step_begin verify "Verify the restored copy"
     local fails=0
     chk() { # label ok(0/1) detail
-        if [[ "$2" == 0 ]]; then printf '  %s✔%s %-26s %s\n' "$C_GRN" "$C_OFF" "$1" "$3" >&2
-        else printf '  %s✘%s %-26s %s\n' "$C_RED" "$C_OFF" "$1" "$3" >&2; fails=$((fails + 1)); fi
+        if [[ "$2" == 0 ]]; then printf '  %s%s%s %-26s %s\n' "$C_GRN" "${I_OK// /}" "$C_OFF" "$1" "$3" >&2
+        else printf '  %s%s%s %-26s %s\n' "$C_RED" "${I_ERROR// /}" "$C_OFF" "$1" "$3" >&2; fails=$((fails + 1)); fi
         log_file_only "verify $1 ok=$2 $3"
     }
     local neut crons mails

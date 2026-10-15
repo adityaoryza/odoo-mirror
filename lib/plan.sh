@@ -42,27 +42,31 @@ step_active() { local s; for s in "${ACTIVE_STEPS[@]}"; do [[ "$s" == "$1" ]] &&
 needs_remote() { step_active connect || step_active inspect || step_active dump || step_active filestore; }
 needs_local_restore() { step_active restore || step_active sanitize || step_active verify; }
 
+# One line of the plan: the label is dimmed so the values stand out.
+_plan_row() { printf '  %s%-14s%s %s\n' "$C_DIM" "$1" "$C_OFF" "$2"; }
+
 print_plan() {
     {
         printf '\n%sPlan%s\n' "$C_BLD" "$C_OFF"
-        printf '  command        %s\n' "${COMMAND:-all}"
-        printf '  steps          %s\n' "${ACTIVE_STEPS[*]:-(none)}"
+        _plan_row command "${COMMAND:-all}"
+        _plan_row steps "${ACTIVE_STEPS[*]:-(none)}"
         if needs_remote; then
-            printf '  server         %s%s%s%s\n' "$REMOTE_HOST" "${SSH_PORT:+ :$SSH_PORT}" "${SSH_USER:+ user=$SSH_USER}" "${SSH_KEY:+ key=$SSH_KEY}"
-            printf '  remote db      %s   (sudo: %s)\n' "${REMOTE_DB:-—}" "$([[ $USE_SUDO == 1 ]] && echo yes || echo no)"
-            printf '  filestore root %s\n' "${REMOTE_FS_ROOT:-auto-detect}"
+            _plan_row server "$REMOTE_HOST${SSH_PORT:+ :$SSH_PORT}${SSH_USER:+ user=$SSH_USER}${SSH_KEY:+ key=$SSH_KEY}"
+            _plan_row "remote db" "${REMOTE_DB:-—}   (sudo: $([[ $USE_SUDO == 1 ]] && echo yes || echo no))"
+            _plan_row "filestore root" "${REMOTE_FS_ROOT:-auto-detect}"
         fi
         if needs_local_restore; then
-            printf '  local db       %s   (%sneutralize: %s, sanitize: %s)\n' "$LOCAL_DB" "$([[ ${LOCAL_DB_AUTO:-0} == 1 ]] && echo 'automatic name, ')" "$([[ $NEUTRALIZE == 1 ]] && echo yes || echo NO)" "$([[ $SANITIZE == 1 ]] && echo yes || echo no)"
-            printf '  odoo           %s -c %s\n' "$ODOO_BIN" "$ODOO_CONF"
+            _plan_row "local db" "$LOCAL_DB   ($([[ ${LOCAL_DB_AUTO:-0} == 1 ]] && echo 'automatic name, ')neutralize: $([[ $NEUTRALIZE == 1 ]] && echo yes || echo NO), sanitize: $([[ $SANITIZE == 1 ]] && echo yes || echo no))"
+            _plan_row odoo "$ODOO_BIN -c $ODOO_CONF"
             if (( ANONYMIZE )); then
-                printf '  personal data  anonymized (private individuals); companies and addresses are kept\n'
+                _plan_row "personal data" "anonymized (private individuals); companies and addresses are kept"
             else
-                printf '  personal data  real customer data kept (add --anonymize to replace the personal data of individuals)\n'
+                _plan_row "personal data" "real customer data kept (add --anonymize to replace the personal data of individuals)"
             fi
         fi
-        printf '  work dir       %s\n' "$WORK_DIR"
-        printf '  log file       %s\n\n' "$LOG_FILE"
+        _plan_row "work dir" "$WORK_DIR"
+        _plan_row "log file" "$LOG_FILE"
+        printf '\n'
     } >&2
     # keep the plan in the log as well (no secrets in it)
     {

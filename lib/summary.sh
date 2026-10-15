@@ -60,6 +60,9 @@ print_failure() { # exit-code line
 
 # The steps that ran with their duration, the warnings they raised, and what to do next.
 print_summary() {
+    # A dry run or a command without steps (check, profiles...) has nothing to summarize.
+    (( DRY_RUN )) && return 0
+    (( ${#STEP_LOG[@]} )) || return 0
     local total=$((SECONDS - RUN_START)) entry name secs note tick=${I_OK// /} restored=0 assembled=0
     local warn=${I_WARN// /}
     printf '\n' >&2
@@ -85,9 +88,5 @@ print_summary() {
     fi
     [[ -z "$LOG_FILE" ]] || lines+=("Log       $LOG_FILE")
     printf '\n' >&2
-    if (( DRY_RUN )); then
-        BOX_COLOR=$C_GRN box "$I_INFO Dry run: nothing was changed" "${lines[@]:-}"
-    else
-        BOX_COLOR=$C_GRN box "$I_OK Done in $(fmt_dur "$total")" "${lines[@]:-}"
-    fi
+    BOX_COLOR=$C_GRN box "$I_OK Done in $(fmt_dur "$total")" "${lines[@]:-}"
 }

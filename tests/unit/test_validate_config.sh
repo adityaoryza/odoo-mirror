@@ -24,5 +24,8 @@ assert_fails "a missing odoo-bin is refused" check "ODOO_BIN=$TMP/none"
 assert_fails "restoring without neutralize is refused" check "NEUTRALIZE=0"
 assert_ok "restoring without neutralize needs the explicit acknowledgement" check "NEUTRALIZE=0 I_UNDERSTAND_LIVE_EMAILS=1"
 assert_fails "a missing custom SQL file is refused" check "SANITIZE_SQL_FILE=$TMP/none.sql"
+assert_fails "a missing SSH key file is refused" check "COMMAND=backup; resolve_steps; REMOTE_HOST=host REMOTE_DB=db SSH_KEY='\\\\'"
+touch "$TMP/id_key"
+assert_ok "an existing SSH key file is accepted" check "COMMAND=backup; resolve_steps; REMOTE_HOST=host REMOTE_DB=db SSH_KEY=$TMP/id_key"
 
 finish

@@ -5,10 +5,10 @@
 # This file is sourced by lib/odoo-mirror.sh: it only defines functions and constants.
 
 if [[ -t 2 && -z "${NO_COLOR:-}" ]]; then
-    C_RED=$'\033[31m'; C_GRN=$'\033[32m'; C_YEL=$'\033[33m'; C_BLU=$'\033[34m'
+    C_RED=$'\033[31m'; C_GRN=$'\033[32m'; C_YEL=$'\033[33m'; C_BLU=$'\033[34m'; C_CYN=$'\033[36m'
     C_DIM=$'\033[2m'; C_BLD=$'\033[1m'; C_OFF=$'\033[0m'
 else
-    C_RED=""; C_GRN=""; C_YEL=""; C_BLU=""; C_DIM=""; C_BLD=""; C_OFF=""
+    C_RED=""; C_GRN=""; C_YEL=""; C_BLU=""; C_CYN=""; C_DIM=""; C_BLD=""; C_OFF=""
 fi
 
 # Icons and the line eraser are for a terminal only: a log, a pipe or a test keeps the plain words.
@@ -16,7 +16,9 @@ UI_TTY=0; UI_UTF=0
 [[ -t 2 ]] && UI_TTY=1
 [[ "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" == *[Uu][Tt][Ff]* ]] && UI_UTF=1
 if (( UI_TTY && UI_UTF )); then
-    I_INFO="ℹ"; I_OK="✔"; I_WARN="⚠"; I_ERROR="✘"; I_STEP="▶"
+    # One-column symbols without an emoji form: ℹ ✔ ⚠ are drawn as two-column emoji by some terminals (Windows Terminal,
+    # for one) and then overlap the text that follows them.
+    I_INFO="•"; I_OK="✓"; I_WARN="▲"; I_ERROR="✗"; I_STEP="▶"
 else
     I_INFO="INFO "; I_OK="OK   "; I_WARN="WARN "; I_ERROR="ERROR"; I_STEP=""
 fi
@@ -45,7 +47,7 @@ _emit() { # level color message
     return 0
 }
 
-log_info()  { _emit INFO  "$C_BLU" "$*"; }
+log_info()  { _emit INFO  "$C_DIM" "$*"; }
 log_ok()    { _emit OK    "$C_GRN" "$*"; }
 log_warn()  { _emit WARN  "$C_YEL" "$*"; }
 log_error() { _emit ERROR "$C_RED" "$*"; }
@@ -74,7 +76,7 @@ step_begin() { # step-name title
     STEP_START=$SECONDS
     local line="[${STEP_INDEX}/${STEP_TOTAL}] $2"
     _eol
-    printf '\n%s%s%s%s\n' "$C_BLD" "${I_STEP:+$I_STEP }" "$line" "$C_OFF" >&2
+    printf '\n%s%s%s%s%s%s\n' "$C_CYN" "${I_STEP:+$I_STEP }" "$C_OFF" "$C_BLD" "$line" "$C_OFF" >&2
     [[ -n "$LOG_FILE" ]] && printf '%s [STEP ] %s\n' "$(_stamp)" "$line" >>"$LOG_FILE"
     return 0
 }
@@ -84,7 +86,9 @@ step_end() {
     local secs=$((SECONDS - STEP_START))
     STEP_LOG+=("${CURRENT_STEP}|${secs}")
     if (( secs >= 2 )); then
-        log_ok "done in $(fmt_dur "$secs")"
+        [[ -n "$LOG_FILE" ]] && printf '%s [OK   ] done in %s\n' "$(_stamp)" "$(fmt_dur "$secs")" >>"$LOG_FILE"
+        _eol
+        printf '%s%s done in %s%s\n' "$C_DIM" "${I_OK// /}" "$(fmt_dur "$secs")" "$C_OFF" >&2
     elif [[ -n "$LOG_FILE" ]]; then
         printf '%s [OK   ] done in %s\n' "$(_stamp)" "$(fmt_dur "$secs")" >>"$LOG_FILE"
     fi

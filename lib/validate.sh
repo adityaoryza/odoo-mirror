@@ -27,6 +27,7 @@ validate_config() {
         fi
         [[ -z "$REMOTE_FS_ROOT" ]] || valid_path "$REMOTE_FS_ROOT" || die "Invalid --remote-fs-root: '$REMOTE_FS_ROOT'"
         [[ -z "$SSH_PORT" || "$SSH_PORT" =~ ^[0-9]+$ ]] || die "Invalid SSH port: $SSH_PORT"
+        [[ -z "$SSH_KEY" || -f "$SSH_KEY" ]] || die "SSH key file not found: '$SSH_KEY' (leave it empty to use the default key or a password)"
     fi
     if needs_local_restore; then
         [[ -z "$LOCAL_DB" || "$LOCAL_DB" == auto ]] || valid_name "$LOCAL_DB" || die "Invalid local database name: '${LOCAL_DB}'"
