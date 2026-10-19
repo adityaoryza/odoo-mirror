@@ -5,6 +5,26 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-10-19
+
+### Added
+- **Odoo version check.** The inspect step reads the Odoo version of the remote database and, when it is going to be restored,
+  compares it with the local Odoo (`odoo-bin`). A different major version stops the run before anything is downloaded. The same
+  check runs for `restore --zip` when the zip manifest records a version. `--allow-version-mismatch` turns the error into a warning.
+  The failure frame says what to do (use the matching Odoo, or `--allow-version-mismatch`) instead of the generic hint of the step.
+- **Local Odoo in the wizard.** The wizard shows the Odoo it detected (with its version) and asks `Use this Odoo?` when the
+  paths were not given by a flag or a profile; `n` asks for `odoo-bin`, the Python interpreter and `odoo.conf`. The plan shows
+  the local Odoo version.
+- **Version mismatch rescue.** In a terminal, a version mismatch offers to look for an Odoo of the right major under the home
+  folder (bounded, read only), lists the matches, validates the choice and continues the run; the profile in use can be updated
+  with it. Without a terminal, or with `-y`, the run still stops with the same error.
+
+### Fixed
+- The manifest of the zip now records the Odoo version of the database, not the version of the local Odoo.
+
+### Documentation
+- Odoo 17 is now listed as tested (a 17.0 database restored with an Odoo 17 checkout, neutralized, verified and cleaned up).
+
 ## [1.3.1] - 2026-10-15
 
 ### Changed
