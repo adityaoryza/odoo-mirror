@@ -29,6 +29,19 @@ collect_config() {
             # Empty answer = automatic name (<server database>_<date>, then _2, _3...), chosen once the server database is known.
             ask LOCAL_DB "Local database to create (empty = automatic: <server database>_<date>)" "" || true
             LOCAL_DB=${LOCAL_DB:-auto}
+            if is_interactive && (( ! ASSUME_YES )) && (( ODOO_LOCAL_AUTO )) && [[ -n "$ODOO_BIN" && -n "$ODOO_PYTHON" && -n "$ODOO_CONF" ]]; then
+                expand_paths
+                local lov; lov=$(local_odoo_version)
+                printf '  Local Odoo: %s%s\n' "$ODOO_BIN" "${lov:+ (Odoo $lov)}" >&2
+                if ! ask_yn "Use this Odoo?" y; then
+                    ODOO_BIN=""; ODOO_PYTHON=""; ODOO_CONF=""
+                    ask_local_odoo_by_hand
+                    refresh_version_tag
+                    lov=$(local_odoo_version)
+                    log_ok "local Odoo: $ODOO_BIN${lov:+ (Odoo $lov)}"
+                fi
+                ODOO_LOCAL_AUTO=0
+            fi
             ask ODOO_BIN    "Path to odoo-bin" "" || die "--odoo-bin is required"
             ask ODOO_PYTHON "Python interpreter for Odoo" "" || die "--odoo-python is required"
             ask ODOO_CONF   "Path to odoo.conf" "" || die "--odoo-conf is required"

@@ -13,7 +13,7 @@ conf_get() { # key  -> value from ODOO_CONF ('' when missing or False)
 }
 
 detect_local_defaults() {
-    local root
+    local root had_bin=$ODOO_BIN had_python=$ODOO_PYTHON had_conf=$ODOO_CONF
     for root in "$PWD" "$HOME/project-19" "$HOME/odoo"; do
         [[ -z "$ODOO_BIN" && -f "$root/odoo/odoo-bin" ]] && ODOO_BIN="$root/odoo/odoo-bin"
         [[ -z "$ODOO_BIN" && -f "$root/odoo-bin" ]] && ODOO_BIN="$root/odoo-bin"
@@ -29,6 +29,150 @@ detect_local_defaults() {
             [[ -x "$cand" ]] && { ODOO_PYTHON=$cand; break; }
         done
     fi
+    [[ ( -z "$had_bin" && -n "$ODOO_BIN" ) || ( -z "$had_python" && -n "$ODOO_PYTHON" ) || ( -z "$had_conf" && -n "$ODOO_CONF" ) ]] \
+        && ODOO_LOCAL_AUTO=1
+    return 0
+}
+
+parse_odoo_version() { # "17.0.1.3" -> "17.0"; prints nothing when the value is empty or not a version
+    local v=${1:-}
+    if [[ "$v" =~ ^([0-9]+\.[0-9]+)(\.|\+|$) ]]; then printf '%s' "${BASH_REMATCH[1]}"; fi
+}
+
+local_odoo_version() { # [odoo-bin]  MAJOR.MINOR of the chosen odoo-bin (from odoo/release.py); nothing when unknown
+    local rel; rel="$(dirname "${1:-${ODOO_BIN:-/nonexistent}}")/odoo/release.py"
+    [[ -f "$rel" ]] || return 0
+    local v; v=$(sed -n 's/^version_info = (\([0-9]*\), *\([0-9]*\).*/\1.\2/p' "$rel" | head -1)
+    parse_odoo_version "$v"
+}
+
+zip_odoo_version() { # zip -> MAJOR.MINOR recorded in its manifest.json; nothing when absent or odd
+    local v
+    v=$(unzip -p "$1" manifest.json 2>/dev/null | sed -n 's/.*"major_version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1) || true
+    parse_odoo_version "$v"
+}
+
+# The version tag written in a manifest follows the local Odoo: "17.0" + the suffix of the current tag ("+e" when enterprise).
+refresh_version_tag() {
+    local v; v=$(local_odoo_version)
+    [[ -n "$v" ]] || return 0
+    local suffix=""; [[ "$ODOO_VERSION_TAG" == *+* ]] && suffix="+${ODOO_VERSION_TAG#*+}"
+    ODOO_VERSION_TAG="${v}${suffix}"
+}
+
+# ask_path VAR "Question" f|x [default]: asks until the path exists as a file (f) or an executable (x); empty = give up.
+ask_path() {
+    local var=$1 question=$2 kind=$3 default=${4:-} tries=0
+    while (( tries++ < 3 )); do
+        printf -v "$var" '%s' ""
+        ask "$var" "$question" "$default" || return 1
+        expand_paths
+        if [[ "$kind" == x ]]; then [[ -x "${!var}" && -f "${!var}" ]] && return 0
+        else [[ -f "${!var}" ]] && return 0; fi
+        printf '  Not found: %s\n' "${!var}" >&2
+        default=""
+    done
+    return 1
+}
+
+# Asks for odoo-bin, python and odoo.conf by hand (the three are asked again, whatever they were).
+ask_local_odoo_by_hand() {
+    ask_path ODOO_BIN    "Path to odoo-bin" f || die "odoo-bin is required"
+    ask_path ODOO_PYTHON "Python interpreter for Odoo" x || die "A python interpreter is required"
+    ask_path ODOO_CONF   "Path to odoo.conf" f || die "odoo.conf is required"
+}
+
+# Odoo checkouts under $HOME (read only, bounded): odoo-bin files, one per line.
+find_odoo_bins() {
+    [[ -d "${HOME:-}" ]] || return 0
+    find "$HOME" -mindepth 1 -maxdepth 4 \( -path /mnt -o -path '/mnt/*' -o -name node_modules -o -name .cache -o -name .git \
+        -o -name .npm -o -name site-packages -o -name venv -o -name '.venv' -o -name 'venv-*' -o -name 'venv[0-9]*' \) -prune \
+        -o -name odoo-bin -type f -print 2>/dev/null | sort
+}
+
+# suggest_python MAJOR -> a virtualenv python made for that Odoo major, when one exists
+suggest_python() {
+    local c
+    for c in "$HOME/venv-odoo-$1.0/bin/python3" "$HOME/venv-odoo-$1/bin/python3" "$HOME/venv$1/bin/python3"; do
+        [[ -x "$c" ]] && { printf '%s' "$c"; return 0; }
+    done
+}
+
+# suggest_conf ODOO_BIN -> the first *.conf next to odoo-bin or one level above (odoo.conf first)
+suggest_conf() {
+    local d c
+    for d in "$(dirname "$1")" "$(dirname "$1")/.."; do
+        for c in "$d/odoo.conf" "$d"/*.conf; do
+            [[ -f "$c" ]] && { (cd "$(dirname "$c")" && printf '%s/%s' "$PWD" "$(basename "$c")"); return 0; }
+        done
+    done
+}
+
+# Interactive rescue after a version mismatch: lists the Odoo of the wanted major found under $HOME and switches the run to
+# the one picked. Returns 1 when nothing was found or chosen.
+rescue_local_odoo() { # DB_VERSION
+    local major=${1%%.*} bin v
+    local -a found=() labels=()
+    log_info "Looking for odoo-bin under $HOME (read only, 4 levels deep)..."
+    while IFS= read -r bin; do
+        v=$(local_odoo_version "$bin")
+        [[ -n "$v" && "${v%%.*}" == "$major" ]] || continue
+        found+=("$bin"); labels+=("$bin  (Odoo $v)")
+    done < <(find_odoo_bins)
+    if (( ${#found[@]} == 0 )); then
+        log_warn "No Odoo $major found under $HOME."
+        return 1
+    fi
+    local i
+    for i in "${!found[@]}"; do printf '  %2d) %s\n' $((i + 1)) "${labels[i]}" >&2; done
+    printf '  %2d) Type the paths by hand\n' $((${#found[@]} + 1)) >&2
+    local answer=""
+    read_answer answer "  Choice [1-$((${#found[@]} + 1)), empty = cancel]: "
+    [[ -n "$answer" ]] || return 1
+    if [[ "$answer" =~ ^[0-9]+$ ]] && (( answer >= 1 && answer <= ${#found[@]} )); then
+        local py conf
+        ODOO_BIN=${found[answer - 1]}
+        py=$(suggest_python "$major"); conf=$(suggest_conf "$ODOO_BIN")
+        printf -v ODOO_PYTHON '%s' ""; printf -v ODOO_CONF '%s' ""
+        ask_path ODOO_PYTHON "Python interpreter for Odoo" x "$py" || die "A python interpreter is required"
+        ask_path ODOO_CONF "Path to odoo.conf" f "$conf" || die "odoo.conf is required"
+    elif [[ "$answer" =~ ^[0-9]+$ ]] && (( answer == ${#found[@]} + 1 )); then
+        ask_local_odoo_by_hand
+    else
+        return 1
+    fi
+    validate_local_odoo
+    return 0
+}
+
+# check_odoo_version DB_VERSION LOCAL_VERSION: dies (or warns with --allow-version-mismatch) when the majors differ;
+# an unknown version on either side skips the check. In a terminal it first offers to look for the matching Odoo.
+check_odoo_version() {
+    local dbv=${1:-} lov=${2:-}
+    [[ -n "$dbv" && -n "$lov" ]] || { log_file_only "Odoo version check skipped (database: '${dbv}', local: '${lov}')"; return 0; }
+    [[ "${dbv%%.*}" != "${lov%%.*}" ]] || return 0
+    local msg="The database on the server is Odoo $dbv but the local Odoo (${ODOO_BIN:-?}) is $lov: pick the matching Odoo with --odoo-bin/--odoo-python/--odoo-conf (or a profile that has them)."
+    if (( ALLOW_VERSION_MISMATCH )); then
+        log_warn "$msg Continuing because of --allow-version-mismatch."
+        return 0
+    fi
+    if is_interactive && (( ! ASSUME_YES )); then
+        log_warn "$msg"
+        if ask_yn "Look for an Odoo ${dbv%%.*} on this machine?" y && rescue_local_odoo "$dbv"; then
+            local nv; nv=$(local_odoo_version)
+            if [[ -n "$nv" && "${nv%%.*}" != "${dbv%%.*}" ]]; then
+                log_error "That Odoo is $nv, not ${dbv%%.*}."
+            else
+                refresh_version_tag
+                load_local_pg
+                log_ok "local Odoo: $ODOO_BIN${nv:+ (Odoo $nv)}"
+                offer_profile_update
+                return 0
+            fi
+        fi
+    fi
+    FAILURE_HINT="Use the Odoo that matches the database (--odoo-bin, --odoo-python, --odoo-conf or a profile that has them), or add --allow-version-mismatch to go on anyway."
+    die "$msg"
 }
 
 load_local_pg() {

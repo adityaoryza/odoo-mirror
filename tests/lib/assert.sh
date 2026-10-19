@@ -31,6 +31,10 @@ assert_contains() {
     if [[ "$1" == *"$2"* ]]; then _t_ok "$3"; else _t_ko "$3" "missing: [$2]" "in: [${1:0:200}]"; fi
 }
 
+assert_not_contains() {
+    if [[ "$1" != *"$2"* ]]; then _t_ok "$3"; else _t_ko "$3" "unexpected: [$2]" "in: [${1:0:200}]"; fi
+}
+
 finish() {
     printf '  %d passed, %d failed\n' "$T_PASS" "$T_FAIL"
     [[ "$T_FAIL" -eq 0 ]]

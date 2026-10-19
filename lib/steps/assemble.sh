@@ -13,8 +13,10 @@ step_assemble() {
     gunzip -c "$SQL_GZ" | progress_pipe "dump.sql" "${usize:-0}" >"$BUILD_DIR/dump.sql"
     tail -n 5 "$BUILD_DIR/dump.sql" | grep -q -E 'PostgreSQL database dump complete|\\unrestrict' \
         || die "dump.sql looks truncated (no end marker)"
+    local mver=$ODOO_VERSION_TAG mmajor=${ODOO_VERSION_TAG%%+*}
+    [[ -z "$REMOTE_ODOO_VERSION" ]] || { mver=$REMOTE_ODOO_VERSION; mmajor=$REMOTE_ODOO_VERSION; }
     printf '{"odoo_dump":"1","db_name":"%s","version":"%s","major_version":"%s","pg_version":"%s","modules":{}}\n' \
-        "$REMOTE_DB" "$ODOO_VERSION_TAG" "${ODOO_VERSION_TAG%%+*}" "${REMOTE_PG_VERSION:-unknown}" >"$BUILD_DIR/manifest.json"
+        "$REMOTE_DB" "$mver" "$mmajor" "${REMOTE_PG_VERSION:-unknown}" >"$BUILD_DIR/manifest.json"
     [[ -d "$BUILD_DIR/filestore" ]] || log_warn "No filestore in the build: the zip will contain the database only."
     ZIP_OUT="$WORK_DIR/${REMOTE_DB}_$(date +%F).zip"
     PARTIAL_FILES+=("$ZIP_OUT.part")

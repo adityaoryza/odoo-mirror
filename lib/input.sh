@@ -10,6 +10,19 @@ is_interactive() {
     [[ -t 0 && -t 2 ]]
 }
 
+# Reads one answer into the variable named by $1: from the terminal, or from stdin when ODOO_MIRROR_MENU_INPUT=-
+# (what the tests use). The prompt is $2.
+read_answer() {
+    local __var=$1 __line=""
+    if [[ "${ODOO_MIRROR_MENU_INPUT:-}" == - ]]; then
+        printf '%s' "$2" >&2
+        read -r __line || true
+    else
+        read -r -p "$2" __line </dev/tty || true
+    fi
+    printf -v "$__var" '%s' "$__line"
+}
+
 ask() { # varname "Question" [default]   (keeps a value that is already set)
     local var=$1 question=$2 default=${3:-} current answer
     current=${!var:-}
@@ -19,10 +32,10 @@ ask() { # varname "Question" [default]   (keeps a value that is already set)
         return 1
     fi
     if [[ -n "$default" ]]; then
-        read -r -p "  ${question} [${default}]: " answer </dev/tty || true
+        read_answer answer "  ${question} [${default}]: "
         answer=${answer:-$default}
     else
-        read -r -p "  ${question}: " answer </dev/tty || true
+        read_answer answer "  ${question}: "
     fi
     printf -v "$var" '%s' "$answer"
     [[ -n "$answer" ]]
@@ -32,7 +45,7 @@ ask_yn() { # "Question" default(y|n)  -> 0 = yes
     local question=$1 default=${2:-y} answer
     if (( ASSUME_YES )); then return 0; fi
     if ! is_interactive; then [[ "$default" == y ]]; return; fi
-    read -r -p "  ${question} [$([[ $default == y ]] && echo 'Y/n' || echo 'y/N')]: " answer </dev/tty || true
+    read_answer answer "  ${question} [$([[ $default == y ]] && echo 'Y/n' || echo 'y/N')]: "
     answer=${answer:-$default}
     [[ "${answer,,}" == y* ]]
 }

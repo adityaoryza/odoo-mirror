@@ -18,7 +18,7 @@ odoo-mirror/
 │   ├── progress.sh            Progress bar (pv or lib/py/progress.py) and the heartbeat spinner.
 │   ├── menu.sh                The main menu (whiptail, or a numbered list). It only sets COMMAND and PROFILE.
 │   ├── update.sh              `odoo-mirror update`: calls the installer of this copy to fetch the newest release.
-│   ├── input.sh               ask / ask_yn / ask_secret and the wizard.
+│   ├── input.sh               ask / ask_yn / ask_secret (answers come from stdin when ODOO_MIRROR_MENU_INPUT=-) and the wizard.
 │   ├── profile.sh             Load and save profiles (parsed with a whitelist, never executed).
 │   ├── cli.sh                 usage and parse_args (only sets variables).
 │   ├── validate.sh            Validation of names, paths, configuration; preflight of the tools.

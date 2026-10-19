@@ -45,6 +45,36 @@ save_profile() {
     log_ok "Profile saved: $file"
 }
 
+# update_profile_keys NAME KEY...: rewrites only these keys in an existing profile (adds them when missing); the rest is kept.
+update_profile_keys() {
+    local name=$1 file k line value; shift
+    file="$CONFIG_HOME/profiles/$name.conf"
+    [[ -f "$file" ]] || { save_profile "$name"; return 0; }
+    for k in "$@"; do
+        value=${!k:-}
+        [[ "$value" != *[\"\\$'\n']* ]] || die "Cannot save $k: the value contains a quote, backslash or newline"
+    done
+    local tmp; tmp=$(mktemp "$file.XXXXXX") || die "Cannot write the profile $file"
+    local -A done_keys=()
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        for k in "$@"; do
+            if [[ "$line" == "$k="* ]]; then line="$k=\"${!k:-}\""; done_keys[$k]=1; fi
+        done
+        printf '%s\n' "$line"
+    done <"$file" >"$tmp"
+    for k in "$@"; do [[ -n "${done_keys[$k]:-}" ]] || printf '%s="%s"\n' "$k" "${!k:-}" >>"$tmp"; done
+    chmod 600 "$tmp"; mv "$tmp" "$file"
+    log_ok "Profile updated: $file"
+}
+
+# After a rescued version mismatch: offers to keep the new Odoo in the profile of this run, so the next run does not ask again.
+offer_profile_update() {
+    local name=${PROFILE:-$SAVE_PROFILE}
+    [[ -n "$name" ]] || return 0
+    ask_yn "Save this Odoo in the profile '$name'?" y || return 0
+    update_profile_keys "$name" ODOO_BIN ODOO_PYTHON ODOO_CONF ODOO_VERSION_TAG
+}
+
 is_command_name() { # word -> 0 when it names a command (all, backup, ...)
     local c
     for c in "${COMMAND_NAMES[@]}"; do [[ "$c" == "$1" ]] && return 0; done

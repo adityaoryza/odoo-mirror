@@ -11,6 +11,9 @@ step_restore() {
     unzip -tq "$zip" >/dev/null 2>&1 || python3 -c 'import sys,zipfile; sys.exit(0 if zipfile.ZipFile(sys.argv[1]).testzip() is None else 1)' "$zip" \
         || die "The zip failed its integrity test: $zip"
 
+    local zv; zv=$(zip_odoo_version "$zip")
+    [[ -z "$zv" ]] || check_odoo_version "$zv" "$(local_odoo_version)"
+
     # dumps from recent PostgreSQL releases contain \restrict lines
     local pv_full pmajor pminor need_minor head_sql
     head_sql=$(unzip -p "$zip" dump.sql 2>/dev/null | head -c 4000 || true)

@@ -119,7 +119,7 @@ The same list is in [`packages.apt`](packages.apt), so `make deps` installs it f
 `requirements-dev.txt` holds the one development tool available from `pip` (ShellCheck), `make deps-dev`. The PostgreSQL client must be recent enough to read
 dumps from current servers (14.19, 15.14, 16.10, 17.6 or later); the restore step checks this and tells you.
 
-**Tested with:** Odoo 19 Enterprise, PostgreSQL 17 on the server and 14 client tools locally, Ubuntu 22.04 and WSL2.
+**Tested with:** Odoo 19 Enterprise and Odoo 17 Enterprise, PostgreSQL 17 on the server and 14 client tools locally, Ubuntu 22.04 and WSL2.
 macOS is not supported yet (GNU-specific options).
 
 ## Installation
@@ -193,6 +193,15 @@ The menu offers: mirror a database, back it up to a zip, restore a zip, list the
 profile, check the machine, update, and help. It uses arrow keys and Enter when `whiptail` is installed (it is on
 Ubuntu and WSL2), and a numbered list otherwise (`ODOO_MIRROR_MENU=plain` forces the list,
 `ODOO_MIRROR_NO_MENU=1` skips the menu and goes straight to the wizard).
+
+When the run restores into a local Odoo, the wizard shows the one it found by itself (`Local Odoo: <odoo-bin> (Odoo 19.0)`)
+and asks `Use this Odoo?`. Answer `n` to type the paths of `odoo-bin`, the Python interpreter and `odoo.conf`. It is not
+asked when the paths come from a flag or a profile, for a plain backup, or without a terminal. The plan also shows the
+version of the local Odoo. If the database turns out to be another Odoo major than the local one, a terminal run offers
+`Look for an Odoo <major> on this machine?`: it lists the matching `odoo-bin` found under your home folder (read only, four
+levels deep, never `/mnt`), lets you pick one (or type the paths), and goes on with the run. When the run uses a profile (or
+`--save-profile`), it then offers to keep that Odoo in the profile. With `-y` or `--non-interactive` nothing is asked and the
+run stops, as before.
 
 **Run a saved profile** (no questions, only the passwords):
 
@@ -273,6 +282,7 @@ Fine tuning: `--steps dump,assemble` runs only those steps, `--skip filestore` r
 | `--anonymize` | Optional: replace the personal data of private individuals. |
 | `--sanitize-sql FILE` | Extra SQL for your own modules, run on the copy. |
 | `--force` | Replace the local database if it exists (you must type its name, or pass `--yes`). |
+| `--allow-version-mismatch` | Only warn, instead of stopping, when the Odoo version of the database (read from the server, or from the zip manifest) differs from the local Odoo. |
 | `--keep-build` | Keep `dump.sql` and `filestore/`. |
 
 **General**: `--profile NAME`, `--save-profile NAME`, `-y/--yes`, `--non-interactive`, `--dry-run`, `--version`, `-h/--help`.
@@ -355,7 +365,7 @@ Exit status is `0` on success and non-zero otherwise (`130` when interrupted).
 
 ## Limitations
 
-- Linux and WSL2 only. Tested with Odoo 19; other versions are unverified.
+- Linux and WSL2 only. Tested with Odoo 19 and Odoo 17; other versions are unverified. The local Odoo must be of the same major version as the database (the tool checks it).
 - A run cannot be resumed: an interrupted download starts again from the beginning.
 - The database dump and the filestore are not taken atomically. Files that change in between are reported by the file count check.
 - Integrity is checked with archive tests, an end-of-dump marker and a file count, not with a checksum compared to the server.

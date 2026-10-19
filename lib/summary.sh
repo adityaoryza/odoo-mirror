@@ -54,7 +54,7 @@ print_failure() { # exit-code line
     printf '\n' >&2
     BOX_COLOR=$C_RED box "$I_ERROR Failed" \
         "$what" \
-        "Hint: $(failure_hint "$CURRENT_STEP" "$rc")" \
+        "Hint: ${FAILURE_HINT:-$(failure_hint "$CURRENT_STEP" "$rc")}" \
         "Log:  ${LOG_FILE:-(no log file yet)}"
 }
 

@@ -4,7 +4,7 @@
 # Every default lives here; a profile, the environment or a flag overrides them (see cli.sh and profile.sh).
 # This file is sourced by lib/odoo-mirror.sh: it only defines functions and constants.
 
-readonly VERSION="1.3.1"
+readonly VERSION="1.3.2"
 readonly PROG="odoo-mirror"
 
 
@@ -31,6 +31,7 @@ OUT_DIR="${OUT_DIR:-$HOME/odoo-mirror}"
 ODOO_BIN="${ODOO_BIN:-}"
 ODOO_PYTHON="${ODOO_PYTHON:-}"
 ODOO_CONF="${ODOO_CONF:-}"
+ODOO_LOCAL_AUTO=0   # 1 = odoo-bin, python or odoo.conf was filled by auto-detection (not by a flag, a profile or the environment)
 ODOO_VERSION_TAG="${ODOO_VERSION_TAG:-19.0+e}"
 SANITIZE_SQL_FILE="${SANITIZE_SQL_FILE:-}"
 
@@ -39,6 +40,8 @@ SANITIZE=1
 ANONYMIZE="${ANONYMIZE:-0}"
 KEEP_BUILD=0
 FORCE=0
+ALLOW_VERSION_MISMATCH=0
+REMOTE_ODOO_VERSION=""   # Odoo version (MAJOR.MINOR) of the database on the server, when known
 ASSUME_YES=0
 DRY_RUN=0
 UPDATE_CHECK_ONLY=0
@@ -72,6 +75,7 @@ declare -a STEP_LOG=()     # "step|seconds", one per finished step (for the summ
 declare -a STEP_NOTES=()   # "step|warning", the warnings raised while a step ran
 MAIN_PID=$$
 FAILURE_REPORTED=0
+FAILURE_HINT=""   # a step that knows better than the generic hint of its step sets this before die()
 RUN_START=$SECONDS
 CURRENT_STEP="(init)"
 REMOTE_DB_BYTES=0

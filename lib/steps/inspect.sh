@@ -11,6 +11,16 @@ step_inspect() {
     REMOTE_PG_VERSION=$(rpg "psql -Atc 'show server_version' postgres" 2>>"$LOG_FILE" | head -1 | awk '{print $1}')
     log_info "database    : $(fmt_bytes "$REMOTE_DB_BYTES")   PostgreSQL ${REMOTE_PG_VERSION:-?}"
 
+    local lv
+    lv=$(rpg "psql -Atc $(q "SELECT latest_version FROM ir_module_module WHERE name='base'") $(q "$REMOTE_DB")" 2>>"$LOG_FILE" | head -1) || true
+    REMOTE_ODOO_VERSION=$(parse_odoo_version "$lv")
+    if [[ -n "$REMOTE_ODOO_VERSION" ]]; then
+        log_info "Odoo version of the database: $REMOTE_ODOO_VERSION"
+        step_active restore && check_odoo_version "$REMOTE_ODOO_VERSION" "$(local_odoo_version)"
+    else
+        log_file_only "Odoo version of the database not readable (got '${lv}'): version check skipped"
+    fi
+
     if step_active filestore || step_active assemble; then
         [[ -n "$REMOTE_FS_ROOT" ]] || discover_filestore
         local dir="$REMOTE_FS_ROOT/$REMOTE_DB"

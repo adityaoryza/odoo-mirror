@@ -51,6 +51,8 @@ SAFETY
                          (default: the real customer data is kept, e.g. to test with real cases)
   --sanitize-sql FILE    extra SQL run on the copy (team specific)
   --force                replace the local database if it exists
+  --allow-version-mismatch  only warn (do not stop) when the Odoo version of the database differs
+                         from the local Odoo
   --keep-build           keep the intermediate files (dump.sql, filestore/)
 
 OTHER
@@ -104,6 +106,7 @@ parse_args() {
             --anonymize) ANONYMIZE=1 ;;
             --sanitize-sql) need_val "$@"; SANITIZE_SQL_FILE=$2; shift ;;
             --force) FORCE=1 ;;
+            --allow-version-mismatch) ALLOW_VERSION_MISMATCH=1 ;;
             --keep-build) KEEP_BUILD=1 ;;
             --profile) need_val "$@"; PROFILE=$2; shift ;;
             --save-profile) need_val "$@"; SAVE_PROFILE=$2; shift ;;

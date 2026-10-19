@@ -15,11 +15,11 @@ load_local_pg() { :; }
 COMMAND=restore STEPS_ARG="" SKIP_ARG=""; resolve_steps
 
 # --- the name: <server database>_<YYMMDD> ----------------------------------------------------------
-REMOTE_DB=preaucess-master
-assert_eq "preaucess_master_$STAMP" "$(auto_local_db_name)" "server database + date, characters PostgreSQL dislikes replaced"
+REMOTE_DB=acme-master
+assert_eq "acme_master_$STAMP" "$(auto_local_db_name)" "server database + date, characters PostgreSQL dislikes replaced"
 
-REMOTE_DB=""; ZIP_IN="/x/y/preaucess-master_2026-10-14.zip"
-assert_eq "preaucess_master_$STAMP" "$(auto_local_db_name)" "from a zip: the date odoo-mirror puts in its name is not doubled"
+REMOTE_DB=""; ZIP_IN="/x/y/acme-master_2026-10-14.zip"
+assert_eq "acme_master_$STAMP" "$(auto_local_db_name)" "from a zip: the date odoo-mirror puts in its name is not doubled"
 
 REMOTE_DB=$(printf 'a%.0s' {1..70}); ZIP_IN=""
 name=$(auto_local_db_name)

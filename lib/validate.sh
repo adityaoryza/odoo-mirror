@@ -18,6 +18,18 @@ expand_paths() {
     done
 }
 
+# The local Odoo (odoo-bin, python, odoo.conf) must exist and odoo.conf must be readable by Odoo; LOCAL_DB must not be
+# the database that Odoo itself uses. Dies with the reason.
+validate_local_odoo() {
+    [[ -f "$ODOO_BIN"  ]] || die "odoo-bin not found: '$ODOO_BIN'"
+    [[ -x "$ODOO_PYTHON" ]] || die "Python not executable: '$ODOO_PYTHON'"
+    [[ -f "$ODOO_CONF" ]] || die "odoo.conf not found: '$ODOO_CONF'"
+    local dup; dup=$(conf_duplicate_options)
+    [[ -z "$dup" ]] || die "$ODOO_CONF has an option written twice: ${dup//$'\n'/; }. Odoo cannot read it: keep one line, then run again."
+    local active; active=$(conf_get db_name)
+    [[ -z "$LOCAL_DB" || "$LOCAL_DB" == auto || "$LOCAL_DB" != "$active" ]] || die "'$LOCAL_DB' is the database your Odoo uses (db_name in odoo.conf). Pick another name, or use --local-db auto."
+}
+
 validate_config() {
     expand_paths
     if needs_remote; then
@@ -31,13 +43,7 @@ validate_config() {
     fi
     if needs_local_restore; then
         [[ -z "$LOCAL_DB" || "$LOCAL_DB" == auto ]] || valid_name "$LOCAL_DB" || die "Invalid local database name: '${LOCAL_DB}'"
-        [[ -f "$ODOO_BIN"  ]] || die "odoo-bin not found: '$ODOO_BIN'"
-        [[ -x "$ODOO_PYTHON" ]] || die "Python not executable: '$ODOO_PYTHON'"
-        [[ -f "$ODOO_CONF" ]] || die "odoo.conf not found: '$ODOO_CONF'"
-        local dup; dup=$(conf_duplicate_options)
-        [[ -z "$dup" ]] || die "$ODOO_CONF has an option written twice: ${dup//$'\n'/; }. Odoo cannot read it: keep one line, then run again."
-        local active; active=$(conf_get db_name)
-        [[ -z "$LOCAL_DB" || "$LOCAL_DB" == auto || "$LOCAL_DB" != "$active" ]] || die "'$LOCAL_DB' is the database your Odoo uses (db_name in odoo.conf). Pick another name, or use --local-db auto."
+        validate_local_odoo
         if (( ! NEUTRALIZE )) && (( ! I_UNDERSTAND_LIVE_EMAILS )); then
             die "Refusing to restore without neutralizing: the copy would keep real SMTP credentials and crons. Add --i-understand-emails-will-be-live if you really mean it."
         fi

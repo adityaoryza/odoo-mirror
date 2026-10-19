@@ -5,6 +5,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib/bootstrap.sh"
 
 LOG_FILE="$TMP/run.log"; : > "$LOG_FILE"
 export COLUMNS=80
+# The tests describe the output of a pipe or a log, not of a terminal: they must not depend on where they are run.
+UI_TTY=0; UI_UTF=0
+I_INFO="INFO "; I_OK="OK   "; I_WARN="WARN "; I_ERROR="ERROR"; I_STEP=""
 
 # --- box: a frame whose lines all have the same width ----------------------------------------------------
 out=$(box "Title" "short" "a longer line of text" 2>&1)
@@ -90,5 +93,12 @@ rc=0; bash "$TMP/die.sh" > "$TMP/die.out" 2>&1 || rc=$?
 assert_eq "1" "$rc" "die() ends the run with status 1"
 assert_contains "$(cat "$TMP/die.out")" "step 'connect' failed (exit 1)" "die() prints the failure frame"
 assert_eq "1" "$(grep -c "failed (exit" "$TMP/die.log")" "...and writes it once in the log file"
+
+# A step that knows the real reason sets its own hint: the generic hint of the step is not shown.
+CURRENT_STEP=inspect; FAILURE_HINT="Use the matching Odoo."
+fail=$(print_failure 1 "" 2>&1)
+assert_contains "$fail" "Hint: Use the matching Odoo." "a specific hint replaces the generic one"
+assert_eq "0" "$(printf '%s' "$fail" | grep -c "sudo password")" "...and the generic hint is not shown"
+FAILURE_HINT=""
 
 finish

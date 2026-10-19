@@ -57,7 +57,8 @@ print_plan() {
         fi
         if needs_local_restore; then
             _plan_row "local db" "$LOCAL_DB   ($([[ ${LOCAL_DB_AUTO:-0} == 1 ]] && echo 'automatic name, ')neutralize: $([[ $NEUTRALIZE == 1 ]] && echo yes || echo NO), sanitize: $([[ $SANITIZE == 1 ]] && echo yes || echo no))"
-            _plan_row odoo "$ODOO_BIN -c $ODOO_CONF"
+            local lov; lov=$(local_odoo_version)
+            _plan_row odoo "$ODOO_BIN -c $ODOO_CONF${lov:+   (Odoo $lov)}"
             if (( ANONYMIZE )); then
                 _plan_row "personal data" "anonymized (private individuals); companies and addresses are kept"
             else
