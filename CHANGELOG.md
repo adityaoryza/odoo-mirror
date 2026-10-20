@@ -5,6 +5,13 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-10-20
+
+### Changed
+- **The restored database is easy to find.** After a restore, the summary ends with the name of the local database on a bar of
+  its own, between two rules, under the frame: black on green on a terminal, plain text with `=` rules without colors (a pipe,
+  `NO_COLOR`). A backup run, which creates no database, shows nothing.
+
 ## [1.3.2] - 2026-10-19
 
 ### Added
