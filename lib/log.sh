@@ -6,7 +6,7 @@
 
 if [[ -t 2 && -z "${NO_COLOR:-}" ]]; then
     C_RED=$'\033[31m'; C_GRN=$'\033[32m'; C_YEL=$'\033[33m'; C_BLU=$'\033[34m'; C_CYN=$'\033[36m'
-    C_DIM=$'\033[2m'; C_BLD=$'\033[1m'; C_HL=$'\033[1;30;42m'; C_OFF=$'\033[0m'
+    C_DIM=$'\033[2m'; C_BLD=$'\033[1m'; C_HL=$'\033[1;97;42m'; C_OFF=$'\033[0m'
 else
     C_RED=""; C_GRN=""; C_YEL=""; C_BLU=""; C_CYN=""; C_DIM=""; C_BLD=""; C_HL=""; C_OFF=""
 fi
