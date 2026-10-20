@@ -5,6 +5,12 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.4] - 2026-10-20
+
+### Fixed
+- The bar of the local database is now bright white on green: black text was hard to read on the terminal themes that draw black as
+  dark gray.
+
 ## [1.3.3] - 2026-10-20
 
 ### Changed
