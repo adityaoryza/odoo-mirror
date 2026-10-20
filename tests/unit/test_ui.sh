@@ -47,9 +47,13 @@ assert_contains "$sum" "2 files changed while they were copied" "...the warning 
 assert_contains "$sum" "Done in 01:30" "...and the total time in the title of the frame"
 assert_contains "$sum" "Database  mirror_copy  (468 MB)" "...the database that was created, with its size"
 assert_contains "$sum" "db_name = mirror_copy" "...and what to do with it"
+assert_eq "LOCAL DATABASE mirror_copy" "$(printf '%s\n' "$sum" | grep 'LOCAL DATABASE' | tr -s ' ' | sed 's/^ //; s/ $//')" "...and the name of the database on a bar of its own, under the frame"
+assert_eq "$(printf '%*s' 29 '' | tr ' ' '=')" "$(printf '%s\n' "$sum" | grep -v '^$' | tail -1 | tr -d ' ')" "...between two rules as wide as the bar, the last thing printed"
+assert_eq "2" "$(printf '%s\n' "$sum" | grep -c '^ *=\{20,\} *$')" "...one rule above the bar and one below"
 STEP_LOG=("dump|3"); LOCAL_DB=""
 sum=$(print_summary 2>&1)
 assert_eq "no" "$([[ "$sum" == *"Database "* ]] && echo yes || echo no)" "a backup run does not mention a database it did not create"
+assert_eq "no" "$([[ "$sum" == *"LOCAL DATABASE"* ]] && echo yes || echo no)" "...and shows no highlighted database name either"
 
 # --- failures ---------------------------------------------------------------------------------------------------
 for s in connect inspect dump filestore assemble restore sanitize verify other; do

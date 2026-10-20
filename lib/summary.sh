@@ -89,4 +89,12 @@ print_summary() {
     [[ -z "$LOG_FILE" ]] || lines+=("Log       $LOG_FILE")
     printf '\n' >&2
     BOX_COLOR=$C_GRN box "$I_OK Done in $(fmt_dur "$total")" "${lines[@]:-}"
+    # The name of the restored database is the one fact needed next: it gets a bar of its own (black on green), between two
+    # rules, last under the frame.
+    if (( restored )) && [[ -n "$LOCAL_DB" ]]; then
+        local text=" LOCAL DATABASE  $LOCAL_DB " rule fill="="
+        (( UI_TTY && UI_UTF )) && fill="━"
+        printf -v rule '%*s' "${#text}" ''; rule=${rule// /$fill}
+        printf '\n  %s%s%s\n  %s%s%s\n  %s%s%s\n\n' "$C_GRN" "$rule" "$C_OFF" "$C_HL" "$text" "$C_OFF" "$C_GRN" "$rule" "$C_OFF" >&2
+    fi
 }
