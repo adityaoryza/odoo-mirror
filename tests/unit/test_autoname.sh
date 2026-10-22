@@ -56,7 +56,8 @@ printf '[options]\ndb_name = one\n# db_name = two\nx = 1\n' > "$TMP/ok.conf"
 ODOO_CONF="$TMP/ok.conf"
 assert_eq "" "$(conf_duplicate_options)" "a commented line is not a duplicate"
 
-check() { ( LOCAL_DB=copy ODOO_PYTHON=/bin/sh NEUTRALIZE=1 I_UNDERSTAND_LIVE_EMAILS=0 SANITIZE_SQL_FILE="" REMOTE_DB="" REMOTE_HOST=""
+printf '#!/bin/sh\nexit 0\n' > "$TMP/python-ok"; chmod +x "$TMP/python-ok"
+check() { ( LOCAL_DB=copy ODOO_PYTHON="$TMP/python-ok" NEUTRALIZE=1 I_UNDERSTAND_LIVE_EMAILS=0 SANITIZE_SQL_FILE="" REMOTE_DB="" REMOTE_HOST=""
             eval "$*"; validate_config ) >/dev/null 2>&1; }
 assert_ok "a clean odoo.conf is accepted" check "ODOO_CONF=$TMP/ok.conf"
 assert_fails "an odoo.conf with a duplicated option is refused before anything is downloaded" check "ODOO_CONF=$TMP/dup.conf"

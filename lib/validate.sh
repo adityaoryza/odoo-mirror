@@ -23,6 +23,7 @@ expand_paths() {
 validate_local_odoo() {
     [[ -f "$ODOO_BIN"  ]] || die "odoo-bin not found: '$ODOO_BIN'"
     [[ -x "$ODOO_PYTHON" ]] || die "Python not executable: '$ODOO_PYTHON'"
+    python_runs_odoo "$ODOO_PYTHON" || die "'$ODOO_PYTHON' cannot import psycopg2: it is not the Python that Odoo runs with (the system python3, when the virtualenv of Odoo is not active). Use --odoo-python /path/to/venv/bin/python3, or activate the virtualenv first."
     [[ -f "$ODOO_CONF" ]] || die "odoo.conf not found: '$ODOO_CONF'"
     local dup; dup=$(conf_duplicate_options)
     [[ -z "$dup" ]] || die "$ODOO_CONF has an option written twice: ${dup//$'\n'/; }. Odoo cannot read it: keep one line, then run again."
