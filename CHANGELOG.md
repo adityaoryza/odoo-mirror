@@ -5,6 +5,15 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.5] - 2026-10-22
+
+### Fixed
+- A Python without Odoo's libraries is no longer picked silently. Detection took the system `python3` when no virtualenv was found, and the
+  restore then failed with `No module named 'psycopg2'` after the database and the filestore had been downloaded (about 15 minutes). Now the
+  active virtualenv (`VIRTUAL_ENV`) and the ones near `odoo-bin` (`venv*`, `.venv*`, `env`) are tried first, and only a Python that can
+  `import psycopg2` is chosen; when there is none the wizard asks for `--odoo-python`. The chosen Python is checked before anything is
+  downloaded (the message says to give `--odoo-python /path/to/venv/bin/python3` or to activate the virtualenv), and it is shown in the plan.
+
 ## [1.3.4] - 2026-10-20
 
 ### Fixed

@@ -12,6 +12,9 @@ conf_get() { # key  -> value from ODOO_CONF ('' when missing or False)
     printf '%s' "$v"
 }
 
+# python_runs_odoo PYTHON — true when it has the library that Odoo needs first (psycopg2), that is, when it is the Python Odoo runs with.
+python_runs_odoo() { "$1" -c 'import psycopg2' >/dev/null 2>&1; }
+
 detect_local_defaults() {
     local root had_bin=$ODOO_BIN had_python=$ODOO_PYTHON had_conf=$ODOO_CONF
     for root in "$PWD" "$HOME/project-19" "$HOME/odoo"; do
@@ -20,13 +23,18 @@ detect_local_defaults() {
         [[ -z "$ODOO_CONF" && -f "$root/odoo.conf" ]] && ODOO_CONF="$root/odoo.conf"
     done
     if [[ -z "$ODOO_PYTHON" ]]; then
-        # Pick the virtualenv of the same Odoo major version as odoo-bin.
-        local major="" rel cand
+        # Pick a Python that can run Odoo: the virtualenv that is active, then the ones near odoo-bin or made for this Odoo major version.
+        # The system python3 is no longer the last resort: without Odoo's libraries (psycopg2) the restore fails after the download.
+        local major="" rel cand bindir
         rel="$(dirname "${ODOO_BIN:-/nonexistent}")/odoo/release.py"
         [[ -f "$rel" ]] && major=$(sed -n 's/^version_info = (\([0-9]*\),.*/\1/p' "$rel" | head -1)
-        for cand in ${major:+"$HOME/venv-odoo-${major}.0/bin/python3"} ${major:+"$HOME"/venv-odoo-"${major}"*/bin/python3} \
-                    "$(dirname "${ODOO_BIN:-/x}")/../venv/bin/python3" "$HOME/venv/bin/python3" "$(command -v python3 || true)"; do
-            [[ -x "$cand" ]] && { ODOO_PYTHON=$cand; break; }
+        bindir="$(dirname "${ODOO_BIN:-/x}")"
+        for cand in ${VIRTUAL_ENV:+"$VIRTUAL_ENV/bin/python3"} \
+                    ${major:+"$HOME/venv-odoo-${major}.0/bin/python3"} ${major:+"$HOME"/venv-odoo-"${major}"*/bin/python3} \
+                    "$bindir"/../venv*/bin/python3 "$bindir"/../.venv*/bin/python3 "$bindir"/../env/bin/python3 \
+                    "$bindir"/venv*/bin/python3 "$bindir"/.venv*/bin/python3 "$HOME/venv/bin/python3" "$HOME"/venv*/bin/python3; do
+            # the directory is made plain (no ".."); the file itself is not resolved: a virtualenv finds its libraries by the path it is run by
+            if [[ -x "$cand" ]] && python_runs_odoo "$cand"; then ODOO_PYTHON="$(cd "$(dirname "$cand")" && pwd -P)/$(basename "$cand")"; break; fi
         done
     fi
     [[ ( -z "$had_bin" && -n "$ODOO_BIN" ) || ( -z "$had_python" && -n "$ODOO_PYTHON" ) || ( -z "$had_conf" && -n "$ODOO_CONF" ) ]] \
