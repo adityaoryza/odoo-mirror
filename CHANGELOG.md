@@ -5,6 +5,8 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.5] - 2026-10-22
+
 ### Fixed
 - A Python without Odoo's libraries is no longer picked silently. Detection took the system `python3` when no virtualenv was found, and the
   restore then failed with `No module named 'psycopg2'` after the database and the filestore had been downloaded (about 15 minutes). Now the
